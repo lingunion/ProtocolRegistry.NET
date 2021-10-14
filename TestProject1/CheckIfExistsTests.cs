@@ -7,9 +7,9 @@ namespace TestProject1
     public class CheckIfExistsTests
     {
         [Theory]
-        [InlineData(".html")]
-        [InlineData(".jpg")]
-        [InlineData(".txt")]
+        [InlineData("http")]
+        [InlineData("https")]
+        [InlineData("mailto")]
         public void DefaultProtocolCheckTest(string protocol)
         {
             Assert.True(ProtocolRegistry.CheckIfExists(protocol), $"default protocol {protocol} exist");

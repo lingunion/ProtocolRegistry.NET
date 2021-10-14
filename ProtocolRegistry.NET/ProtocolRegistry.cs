@@ -20,6 +20,7 @@ namespace LingUnion
             return protocolRegistry.CheckIfExists(protocol);
         }
 
+        // Caution: protocol must contain lower alphabet and hypen
         public static void Register(string protocol, string command, bool overwrite = false, bool terminal = false, bool script = false)
         {
             protocolRegistry.Register(protocol, command, overwrite, terminal, script);

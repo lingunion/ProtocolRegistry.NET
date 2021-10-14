@@ -4,14 +4,36 @@ using LingUnion;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.IO;
+using System.Linq;
 
 namespace TestProject1
 {
     public class RegisterTests
     {
-        public string GetTestProtocol() => $"protocol-registry-test-1-{(new Random()).Next(100000000)}";
-        public string CodeBaseDir => Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase.Replace("file:///", ""));
-        public string ProtocolExecPath => Path.Join(CodeBaseDir, @"RegisterWindowTestConsole\RegisterWindowTestConsole.exe");
+        public string GetTestProtocol()
+        {
+            var randChars = (new int[(new Random()).Next(50)]).Select(num => (char)('a' + (new Random().Next(26))));
+            return $"protocol-registry-test-{(string.Join("", randChars))}";
+        }
+        public string CodeBaseDir => Directory.GetCurrentDirectory();
+        public string ProtocolExecPath
+        {
+            get
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    return Path.Join(CodeBaseDir, @"RegisterWindowTestConsole", @"RegisterWindowTestConsole.exe");
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    return Path.Join(CodeBaseDir, @"RegisterWindowTestConsole" ,@"RegisterWindowTestConsoleLinux");
+                }
+                else
+                {
+                    throw new PlatformNotSupportedException();
+                }
+            }
+        }
 
         public bool CheckResultTextWindows(string protocol, string dir) 
         {
@@ -30,7 +52,61 @@ namespace TestProject1
             runWindowsCallback.Start();
             runWindowsCallback.WaitForExit();
             System.Threading.Thread.Sleep(1000);
-            // Currently runWindowsCallback cannot run
+            return File.Exists(Path.Join($"{dir}", $"{protocol}.txt"));
+        }
+
+        public bool CheckResultTextLinux(string protocol, string dir)
+        {
+            string scriptPath = Path.Join(CodeBaseDir, "check.sh");
+            File.WriteAllText(scriptPath, $@"xdg-open {protocol}://{dir}");
+            Process chmod = new Process()
+            {
+                StartInfo = {
+                    FileName = "chmod",
+                    ArgumentList =
+                    {
+                        "+x",
+                        scriptPath,
+                    },
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    },
+            };
+            chmod.Start();
+            chmod.WaitForExit();
+            string chmodError = chmod.StandardError.ReadToEnd();
+            if (chmod.ExitCode != 0 || !string.IsNullOrWhiteSpace(chmodError))
+            {
+                throw new Exception(chmodError);
+            }
+
+            Process scriptProcess = new Process()
+            {
+                StartInfo =
+                {
+                    FileName = "/bin/bash",
+                    ArgumentList = { "-c", $"'{scriptPath}'" },
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                }
+            };
+            scriptProcess.Start();
+            scriptProcess.WaitForExit();
+            string scriptError = scriptProcess.StandardError.ReadToEnd();
+            if (scriptProcess.ExitCode != 0 || !string.IsNullOrWhiteSpace(scriptError))
+            {
+
+                throw new Exception(scriptError);
+            }
+            File.Delete(scriptPath);
+            
+            System.Threading.Thread.Sleep(1000);
             return File.Exists(Path.Join($"{dir}", $"{protocol}.txt"));
         }
 
@@ -50,7 +126,7 @@ namespace TestProject1
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                throw new NotImplementedException();
+                CheckResultTextLinux(testProtocol, folder);
             } 
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
@@ -78,7 +154,7 @@ namespace TestProject1
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                throw new NotImplementedException();
+                CheckResultTextLinux(testProtocol, folder);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
@@ -105,7 +181,7 @@ namespace TestProject1
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                throw new NotImplementedException();
+                CheckResultTextLinux(testProtocol, folder);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
@@ -132,7 +208,37 @@ namespace TestProject1
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
+                CheckResultTextLinux(testProtocol, folder);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
                 throw new NotImplementedException();
+            }
+            else
+            {
+                throw new PlatformNotSupportedException();
+            }
+        }
+
+        [Fact]
+        public void DefaultRegisterTestOverwrite()
+        {
+            string testProtocol = GetTestProtocol();
+            Assert.False(ProtocolRegistry.CheckIfExists(testProtocol));
+            string folder = CodeBaseDir;
+            string protocolExecPath = ProtocolExecPath;
+            ProtocolRegistry.Register(testProtocol, $"{protocolExecPath} $_URL_");
+            Assert.True(ProtocolRegistry.CheckIfExists(testProtocol));
+            ProtocolRegistry.Register(testProtocol, $"{protocolExecPath} $_URL_", overwrite: true);
+            Assert.True(ProtocolRegistry.CheckIfExists(testProtocol));
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Currently cannot run without terminal due to bug
+                // Assert.True(CheckResultTextWindows(testProtocol, folder));
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                CheckResultTextLinux(testProtocol, folder);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {

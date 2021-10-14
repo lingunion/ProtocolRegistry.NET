@@ -46,7 +46,7 @@ _URL_=$1
                 $@"./{protocol}Wrapper.{(Platform == Platforms.Windows ? "bat" : "sh")}"
                 );
             // Caution: batch cannot recognize UTF8
-            File.WriteAllText(wrapperScriptPath, contents, new UTF8Encoding(false));
+            File.WriteAllLines(wrapperScriptPath, contents.Split(new []{ "\r\n" , "\r", "\n"}, StringSplitOptions.RemoveEmptyEntries), new UTF8Encoding(false));
             return wrapperScriptPath;
         }
 
@@ -66,7 +66,6 @@ _URL_=$1
                             scriptPath,
                         },
                         UseShellExecute = false,
-                        // https://stackoverflow.com/questions/5094003/net-windowstyle-hidden-vs-createnowindow-true
                         CreateNoWindow = true,
                         WindowStyle = ProcessWindowStyle.Hidden,
                         RedirectStandardOutput = true,
@@ -76,7 +75,7 @@ _URL_=$1
                 chmod.Start();
                 chmod.WaitForExit();
                 string chmodError = chmod.StandardError.ReadToEnd();
-                if (chmod.ExitCode != 0 || !String.IsNullOrWhiteSpace(chmodError))
+                if (chmod.ExitCode != 0 || !string.IsNullOrWhiteSpace(chmodError))
                 {
                     throw new Exception(chmodError);
                 }

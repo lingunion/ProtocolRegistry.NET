@@ -27,7 +27,7 @@ namespace LingUnion.Windows
                 if (overwrite == false) throw new Exception("Protocol already exists");
                 Registry.CurrentUser.DeleteSubKeyTree(keyPath);
             }
-            string processedCommand = LingUnion.ProtocolRegistry.PreProcessCommand(protocol, command, scriptRequired);
+            string processedCommand = LingUnion.ProtocolRegistry.PreProcessCommands(protocol, command, scriptRequired);
 
             RegistryKey registryKey = Registry.CurrentUser.CreateSubKey(keyPath);
 

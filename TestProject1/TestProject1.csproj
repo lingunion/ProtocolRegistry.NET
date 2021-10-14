@@ -11,6 +11,7 @@
     <None Remove="RegisterWindowTestConsole\RegisterWindowTestConsole.dll" />
     <None Remove="RegisterWindowTestConsole\RegisterWindowTestConsole.exe" />
     <None Remove="RegisterWindowTestConsole\RegisterWindowTestConsole.runtimeconfig.json" />
+    <None Remove="RegisterWindowTestConsole\RegisterWindowTestConsoleLinux" />
     <None Remove="testEnvironments.json" />
   </ItemGroup>
 
@@ -25,6 +26,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="RegisterWindowTestConsole\RegisterWindowTestConsole.runtimeconfig.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="RegisterWindowTestConsole\RegisterWindowTestConsoleLinux">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

@@ -9,7 +9,7 @@ namespace LingUnion
     public partial class ProtocolRegistry
     {
         public static string subtituteCommand(string command, string url) => string.Join(url, command.Split("$_URL_"));
-        public static string PreProcessCommand(string protocol, string command, bool scriptRequired)
+        public static string PreProcessCommands(string protocol, string command, bool scriptRequired)
         {
             if (!scriptRequired)
             {
