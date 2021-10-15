@@ -7,6 +7,18 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+    <PackageReference Include="plist-cil" Version="2.2.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="OSX\" />
+    <None Remove="OSX\defaultAppExist.sh" />
+    <None Remove="plist-cil" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="OSX\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="OSX\defaultAppExist.sh" />
+  </ItemGroup>
 </Project>

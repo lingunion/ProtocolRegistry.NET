@@ -13,7 +13,7 @@ namespace TestProject1
         public string GetTestProtocol()
         {
             var randChars = (new int[(new Random()).Next(50)]).Select(num => (char)('a' + (new Random().Next(26))));
-            return $"protocol-registry-test-{(string.Join("", randChars))}";
+            return $"protocolregistrytest{(string.Join("", randChars))}";
         }
         public string CodeBaseDir => Directory.GetCurrentDirectory();
         public string ProtocolExecPath
@@ -30,7 +30,7 @@ namespace TestProject1
                 }
                 else
                 {
-                    throw new PlatformNotSupportedException();
+                    return Path.Join(CodeBaseDir, @"RegisterWindowTestConsole", @"RegisterWindowTestConsoleOSX");
                 }
             }
         }
@@ -110,6 +110,30 @@ namespace TestProject1
             return File.Exists(Path.Join($"{dir}", $"{protocol}.txt"));
         }
 
+        public bool CheckResultTextOSX(string protocol, string dir)
+        {
+            Process openProcess = new()
+            {
+                StartInfo =
+                {
+                    FileName = "open",
+                    ArgumentList = {$"{protocol}://{dir}"},
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardError = true,
+                }
+            };
+            openProcess.Start();
+            openProcess.WaitForExit();
+            string openError = openProcess.StandardError.ReadToEnd();
+            if (openProcess.ExitCode != 0 || !string.IsNullOrWhiteSpace(openError))
+            {
+                throw new Exception(openError);
+            }
+            System.Threading.Thread.Sleep(5000);
+            return File.Exists(Path.Join(dir, $"{protocol}.txt"));
+        }
+
         [Fact]
         public void DefaultRegisterTest()
         {
@@ -130,7 +154,7 @@ namespace TestProject1
             } 
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                throw new NotImplementedException();
+                Assert.True(CheckResultTextOSX(testProtocol, folder));
             } 
             else
             {
@@ -158,7 +182,7 @@ namespace TestProject1
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                throw new NotImplementedException();
+                Assert.True(CheckResultTextOSX(testProtocol, folder));
             }
             else
             {
@@ -185,7 +209,7 @@ namespace TestProject1
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                throw new NotImplementedException();
+                Assert.True(CheckResultTextOSX(testProtocol, folder));
             }
             else
             {
@@ -212,7 +236,7 @@ namespace TestProject1
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                throw new NotImplementedException();
+                Assert.True(CheckResultTextOSX(testProtocol, folder));
             }
             else
             {
@@ -242,7 +266,7 @@ namespace TestProject1
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                throw new NotImplementedException();
+                Assert.True(CheckResultTextOSX(testProtocol, folder));
             }
             else
             {

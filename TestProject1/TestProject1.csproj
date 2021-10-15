@@ -51,4 +51,9 @@
     <ProjectReference Include="..\ProtocolRegistry.NET\ProtocolRegistry.NET.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="RegisterWindowTestConsole\RegisterWindowTestConsoleOSX">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
